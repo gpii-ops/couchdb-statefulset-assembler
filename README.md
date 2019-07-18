@@ -21,8 +21,7 @@ On push/merge to master, CI will automatically build and push
 
 ### Tags
 
-Create and push git tag and CI will build and publish corresponding`
-`gpii/couchdb-statefulset-assembler:${git_tag}` docker image.
+Create and push git tag and CI will build and publish corresponding `gpii/couchdb-statefulset-assembler:${git_tag}` docker image.
 
 #### Tag format
 
