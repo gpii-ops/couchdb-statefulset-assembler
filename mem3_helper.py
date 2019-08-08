@@ -93,7 +93,7 @@ def check_membership_forever():
                 elif 'cluster_nodes' in membership_json and 'all_nodes' in membership_json:
                     if membership_json['cluster_nodes'] != membership_json['all_nodes']:
                         print('ERROR: cluster_nodes contains:', membership_json['cluster_nodes'], 'while all_nodes contains:', membership_json['all_nodes'], '!', file=sys.stderr)
-                    if expected_peers_count and membership_json['cluster_nodes'] and len(membership_json['cluster_nodes']) < int(expected_peers_count):
+                    if expected_peers_count and len(membership_json['cluster_nodes']) < int(expected_peers_count):
                         print('ERROR: cluster_nodes contains', len(membership_json['cluster_nodes']), 'nodes, but expecting', expected_peers_count, 'nodes!', file=sys.stderr)
                 else:
                     print('ERROR: _membership response does not contain expected data structure!', file=sys.stderr)
