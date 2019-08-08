@@ -79,8 +79,8 @@ def check_membership_forever():
     creds = (os.getenv("COUCHDB_USER"), os.getenv("COUCHDB_PASSWORD"))
     expected_peers_count = os.getenv("COUCHDB_CLUSTER_SIZE")
     uri = "http://127.0.0.1:5984/_membership"
+    print('Checking _membership data...')
     while True:
-        print('Checking _membership data...')
         if creds[0] and creds[1]:
             resp = requests.get(uri, auth=creds)
         else:
