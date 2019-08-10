@@ -85,7 +85,9 @@ def check_membership_forever():
             resp = requests.get(uri, auth=creds)
         else:
             resp = requests.get(uri)
-        if resp.status_code == 200:
+        if resp.status_code != 200:
+            print('ERROR: _membership responded with', resp.status_code, '!', file=sys.stderr)
+        else:
             try:
                 membership_json = json.loads(resp.text)
                 if 'error' in membership_json:
@@ -99,8 +101,6 @@ def check_membership_forever():
                     print('ERROR: _membership response does not contain expected data structure!', file=sys.stderr)
             except json.decoder.JSONDecodeError:
                 print('ERROR: unable to decode JSON in _membership response!', file=sys.stderr)
-        else:
-            print('ERROR: _membership responded with', resp.status_code, '!', file=sys.stderr)
         time.sleep(10)
 
 if __name__ == '__main__':
