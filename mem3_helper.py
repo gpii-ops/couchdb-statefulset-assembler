@@ -12,6 +12,7 @@ import dns.resolver
 import socket
 import backoff
 import os
+import sys
 
 class PeerDiscoveryException(Exception):
     pass
@@ -72,12 +73,36 @@ def connect_the_dots(names):
             time.sleep(5)
             resp = requests.put(uri, data=json.dumps(doc))
         print('Adding cluster member', name, resp.status_code)
+    print('Cluster membership populated!')
 
-def sleep_forever():
+def check_membership_forever():
+    creds = (os.getenv("COUCHDB_USER"), os.getenv("COUCHDB_PASSWORD"))
+    expected_peers_count = os.getenv("COUCHDB_CLUSTER_SIZE")
+    uri = "http://127.0.0.1:5984/_membership"
+    print('Checking _membership data...')
     while True:
-        time.sleep(5)
+        if creds[0] and creds[1]:
+            resp = requests.get(uri, auth=creds)
+        else:
+            resp = requests.get(uri)
+        if resp.status_code != 200:
+            print('ERROR: _membership responded with', resp.status_code, '!', file=sys.stderr)
+        else:
+            try:
+                membership_json = json.loads(resp.text)
+                if 'error' in membership_json:
+                    print('ERROR: _membership response contains error:', membership_json['error'], '!', file=sys.stderr)
+                elif 'cluster_nodes' in membership_json and 'all_nodes' in membership_json:
+                    if membership_json['cluster_nodes'] != membership_json['all_nodes']:
+                        print('ERROR: cluster_nodes contains:', membership_json['cluster_nodes'], 'while all_nodes contains:', membership_json['all_nodes'], '!', file=sys.stderr)
+                    if expected_peers_count and len(membership_json['cluster_nodes']) < int(expected_peers_count):
+                        print('ERROR: cluster_nodes contains', len(membership_json['cluster_nodes']), 'nodes, but expecting', expected_peers_count, 'nodes!', file=sys.stderr)
+                else:
+                    print('ERROR: _membership response does not contain expected data structure!', file=sys.stderr)
+            except json.decoder.JSONDecodeError:
+                print('ERROR: unable to decode JSON in _membership response!', file=sys.stderr)
+        time.sleep(10)
 
 if __name__ == '__main__':
     connect_the_dots(discover_peers(construct_service_record()))
-    print('Cluster membership populated!')
-    sleep_forever()
+    check_membership_forever()
