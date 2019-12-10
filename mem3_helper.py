@@ -107,8 +107,8 @@ def check_membership_forever():
                 else:
                     print('ERROR: _membership response does not contain expected data structure!', file=sys.stderr)
                 if expected_peers_count:
-                    failed_peers_count = expected_peers_count - len(membership_json['all_nodes'])
-                    if failed_peers_count > 0:
+                    missing_peers_count = expected_peers_count - len(membership_json['all_nodes'])
+                    if missing_peers_count > 0:
                         missing_peers = [node for node in membership_json['cluster_nodes'] if node not in membership_json['all_nodes']]
                         for missing_peer in missing_peers:
                             print('ERROR: Missing couchdb node in the cluster: %s'%(missing_peer.split('@')[1]), file=sys.stderr)
