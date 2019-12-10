@@ -82,7 +82,9 @@ def connect_the_dots(names):
 
 def check_membership_forever():
     creds = (os.getenv("COUCHDB_USER"), os.getenv("COUCHDB_PASSWORD"))
-    expected_peers_count = int(os.getenv("COUCHDB_CLUSTER_SIZE"))
+    expected_peers_count = os.getenv("COUCHDB_CLUSTER_SIZE")
+    if expected_peers_count:
+        expected_peers_count = int(expected_peers_count)
     uri = "http://127.0.0.1:5984/_membership"
     print('Checking _membership data...')
     while True:
@@ -104,11 +106,12 @@ def check_membership_forever():
                         print('ERROR: cluster_nodes contains', len(membership_json['cluster_nodes']), 'nodes, but expecting', expected_peers_count, 'nodes!', file=sys.stderr)
                 else:
                     print('ERROR: _membership response does not contain expected data structure!', file=sys.stderr)
-                failed_peers_count = expected_peers_count - len(membership_json['all_nodes'])
-                if failed_peers_count > 0:
-                    missing_peers = [node for node in membership_json['cluster_nodes'] if node not in membership_json['all_nodes']]
-                    for missing_peer in missing_peers:
-                        print('ERROR: Missing couchdb node in the cluster: %s'%(missing_peer.split('@')[1]), file=sys.stderr)
+                if expected_peers_count:
+                    failed_peers_count = expected_peers_count - len(membership_json['all_nodes'])
+                    if failed_peers_count > 0:
+                        missing_peers = [node for node in membership_json['cluster_nodes'] if node not in membership_json['all_nodes']]
+                        for missing_peer in missing_peers:
+                            print('ERROR: Missing couchdb node in the cluster: %s'%(missing_peer.split('@')[1]), file=sys.stderr)
             except json.decoder.JSONDecodeError:
                 print('ERROR: unable to decode JSON in _membership response!', file=sys.stderr)
         time.sleep(10)
