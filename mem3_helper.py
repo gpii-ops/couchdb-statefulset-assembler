@@ -53,7 +53,7 @@ def discover_peers(service_record):
             statefulset_name = re.search(r'(\w+-\w+-)\d+\.(.*)',peers[0])
             expected_peers = ['%s%s.%s'%(statefulset_name[1], peer_num, statefulset_name[2]) for peer_num in list(range(expected_peers_count))]
             for peer_not_found in [peer for peer in expected_peers if peer not in peers]:
-                print('ERROR: Missing couchdb node in the cluster: %s'%(peer_not_found), file=sys.stderr)
+                print('DISCOVER: Waiting for couchdb node in the cluster: %s'%(peer_not_found))
             raise PeerDiscoveryException
     else:
         print('Discovered', peers_count, 'peers:', peers)
